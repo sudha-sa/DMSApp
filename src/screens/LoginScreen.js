@@ -18,10 +18,11 @@ export default function LoginScreen() {
         }
         setLoading(true);
         try {
-            await generateOTP(mobile);
+            const response = await generateOTP(mobile);
             dispatch(setMobileNumber(mobile));
             setStep(2);
-            Alert.alert('Success', 'OTP sent successfully!');
+            const successMessage = response?.data?.message || 'OTP sent successfully!';
+            Alert.alert('Success', successMessage);
         } catch (error) {
             Alert.alert('Error', error.response?.data?.message || 'Failed to send OTP');
         } finally {
