@@ -75,10 +75,13 @@ export default function LoginScreen() {
         setLoading(true);
         try {
             const response = await validateOTP(mobile, otp);
-            const token = response.data?.token || 'mock_token_if_api_returns_empty';
+            const token = response.data?.token || response.data?.data?.token;
+            if (!token) {
+                throw new Error('Token not returned from server');
+            }
             dispatch(loginSuccess(token));
         } catch (error) {
-            Alert.alert('Error', error.response?.data?.message || 'Invalid OTP');
+            Alert.alert('Error', error.response?.data?.message || error.message || 'Invalid OTP');
         } finally {
             setLoading(false);
         }
