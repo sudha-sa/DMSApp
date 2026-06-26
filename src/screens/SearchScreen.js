@@ -277,7 +277,7 @@ const styles = StyleSheet.create({
     remarksText: { fontSize: 12, color: '#7f8c8d', fontStyle: 'italic', marginTop: 4 },
     cardActions: { flexDirection: 'column' },
     actionBtn: { paddingVertical: 8, paddingHorizontal: 12, borderRadius: 4, marginVertical: 3, alignItems: 'center', width: 85 },
-    previewBtn: { backgroundColor: '#f5f6fa', borderWidth: 1, borderColor: '#007AFF' },
+    previewBtn: { backgroundColor: '#c0c1c7', borderWidth: 1, borderColor: '#007AFF' },
     downloadBtn: { backgroundColor: '#28a745' },
     actionBtnText: { fontSize: 12, fontWeight: 'bold', color: '#fff' },
     emptyText: { textAlign: 'center', color: '#718093', marginTop: 40, fontSize: 14 }
