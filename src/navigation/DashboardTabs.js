@@ -1,8 +1,9 @@
+/* eslint-disable react/no-unstable-nested-components */
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import UploadScreen from '../screens/UploadScreen';
 import SearchScreen from '../screens/SearchScreen';
-import { Button } from 'react-native';
+import { Button, Text } from 'react-native';
 import { useDispatch } from 'react-redux';
 import { logout } from '../store/authSlice';
 
@@ -16,7 +17,7 @@ export default function DashboardTabs() {
     };
     return (
         <Tab.Navigator
-            screenOptions={{
+            screenOptions={({ route }) => ({
                 tabBarActiveTintColor: '#007AFF',
                 tabBarInactiveTintColor: 'gray',
                 headerStyle: { backgroundColor: '#007AFF', },
@@ -29,7 +30,16 @@ export default function DashboardTabs() {
                         color="#ad1212"
                     />
                 ),
-            }}
+                tabBarIcon: ({ color, size }) => {
+                    let iconSymbol = '';
+                    if (route.name === 'UploadDoc') {
+                        iconSymbol = '📤';
+                    } else if (route.name === 'SearchDoc') {
+                        iconSymbol = '🔍';
+                    }
+                    return <Text style={{ fontSize: size, color: color }}>{iconSymbol}</Text>;
+                },
+            })}
         >
             <Tab.Screen
                 name="UploadDoc"
