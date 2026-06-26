@@ -166,6 +166,11 @@ export default function SearchScreen() {
 
     // Search is wrapped in useCallback so the handler is stable across renders.
     const handleSearch = useCallback(async () => {
+        if (!token) {
+            Alert.alert('Authentication Error', 'Please login before searching documents.');
+            return;
+        }
+
         setLoading(true);
 
         const searchPayload = {
@@ -181,29 +186,16 @@ export default function SearchScreen() {
             search: { value: '' }
         };
 
-        // Mock mode is enabled temporarily so the UI can be tested without the backend.
-        const USE_MOCK = true;
-
         try {
-            if (USE_MOCK) {
-                setTimeout(() => {
-                    setResults([
-                        { id: '1', fileName: 'work_order_2026.pdf', major_head: 'Company', minor_head: 'Work Order', date: '15-05-2026', remarks: 'Q2 operational agreement file' },
-                        { id: '2', fileName: 'passport_scan.png', major_head: 'Personal', minor_head: 'ID Proof', date: '20-05-2026', remarks: 'Verified copy' }
-                    ]);
-                    setLoading(false);
-                }, 600);
-                return;
-            }
-
             const response = await searchDocuments(token, searchPayload);
             setResults(response.data?.data || []);
         } catch (error) {
-            Alert.alert('Search Error', 'Failed to retrieve files from structural catalog.');
+            Alert.alert(
+                'Search Error',
+                error.response?.data?.message || error.message || 'Failed to retrieve files from structural catalog.'
+            );
         } finally {
-            if (!USE_MOCK) {
-                setLoading(false);
-            }
+            setLoading(false);
         }
     }, [fromDate, majorHead, minorHead, searchTag, toDate, token]);
 
