@@ -1,8 +1,43 @@
-import React, { useState } from 'react';
+import React, { memo, useCallback, useState } from 'react';
 import { StyleSheet, Text, TextInput, TouchableOpacity, View, ActivityIndicator, Alert } from 'react-native';
 import { useDispatch } from 'react-redux';
 import { generateOTP, validateOTP } from '../services/api';
 import { setMobileNumber, loginSuccess } from '../store/authSlice';
+
+const PhoneStep = memo(({ mobile, loading, onChangeMobile, onSendOTP }) => (
+    <View style={styles.card}>
+        <Text style={styles.label}>Enter Mobile Number</Text>
+        <TextInput
+            style={styles.input}
+            placeholder="e.g. 9876543210"
+            keyboardType="phone-pad"
+            value={mobile}
+            onChangeText={onChangeMobile}
+        />
+        <TouchableOpacity style={styles.button} onPress={onSendOTP} disabled={loading}>
+            {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Send OTP</Text>}
+        </TouchableOpacity>
+    </View>
+));
+
+const OtpStep = memo(({ otp, loading, onChangeOtp, onVerifyOTP, onBack }) => (
+    <View style={styles.card}>
+        <Text style={styles.label}>Enter OTP</Text>
+        <TextInput
+            style={styles.input}
+            placeholder="Enter verification code"
+            keyboardType="number-pad"
+            value={otp}
+            onChangeText={onChangeOtp}
+        />
+        <TouchableOpacity style={styles.button} onPress={onVerifyOTP} disabled={loading}>
+            {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Verify & Login</Text>}
+        </TouchableOpacity>
+        <TouchableOpacity onPress={onBack} style={styles.backButton}>
+            <Text style={styles.backText}>Change Mobile Number</Text>
+        </TouchableOpacity>
+    </View>
+));
 
 export default function LoginScreen() {
     const [mobile, setMobile] = useState('');
@@ -11,11 +46,12 @@ export default function LoginScreen() {
     const [loading, setLoading] = useState(false);
     const dispatch = useDispatch();
 
-    const handleSendOTP = async () => {
+    const handleSendOTP = useCallback(async () => {
         if (!mobile || mobile.length < 10) {
             Alert.alert('Error', 'Please enter a valid mobile number');
             return;
         }
+
         setLoading(true);
         try {
             const response = await generateOTP(mobile);
@@ -28,17 +64,17 @@ export default function LoginScreen() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [dispatch, mobile]);
 
-    const handleVerifyOTP = async () => {
+    const handleVerifyOTP = useCallback(async () => {
         if (!otp || otp.length < 4) {
             Alert.alert('Error', 'Please enter a valid OTP');
             return;
         }
+
         setLoading(true);
         try {
             const response = await validateOTP(mobile, otp);
-            // Access token matching your postman header requirement
             const token = response.data?.token || 'mock_token_if_api_returns_empty';
             dispatch(loginSuccess(token));
         } catch (error) {
@@ -46,43 +82,27 @@ export default function LoginScreen() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [dispatch, mobile, otp]);
 
     return (
         <View style={styles.container}>
             <Text style={styles.title}>Document Management System</Text>
 
             {step === 1 ? (
-                <View style={styles.card}>
-                    <Text style={styles.label}>Enter Mobile Number</Text>
-                    <TextInput
-                        style={styles.input}
-                        placeholder="e.g. 9876543210"
-                        keyboardType="phone-pad"
-                        value={mobile}
-                        onChangeText={setMobile}
-                    />
-                    <TouchableOpacity style={styles.button} onPress={handleSendOTP} disabled={loading}>
-                        {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Send OTP</Text>}
-                    </TouchableOpacity>
-                </View>
+                <PhoneStep
+                    mobile={mobile}
+                    loading={loading}
+                    onChangeMobile={setMobile}
+                    onSendOTP={handleSendOTP}
+                />
             ) : (
-                <View style={styles.card}>
-                    <Text style={styles.label}>Enter OTP</Text>
-                    <TextInput
-                        style={styles.input}
-                        placeholder="Enter verification code"
-                        keyboardType="number-pad"
-                        value={otp}
-                        onChangeText={setOtp}
-                    />
-                    <TouchableOpacity style={styles.button} onPress={handleVerifyOTP} disabled={loading}>
-                        {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Verify & Login</Text>}
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => setStep(1)} style={styles.backButton}>
-                        <Text style={styles.backText}>Change Mobile Number</Text>
-                    </TouchableOpacity>
-                </View>
+                <OtpStep
+                    otp={otp}
+                    loading={loading}
+                    onChangeOtp={setOtp}
+                    onVerifyOTP={handleVerifyOTP}
+                    onBack={() => setStep(1)}
+                />
             )}
         </View>
     );
